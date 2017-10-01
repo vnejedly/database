@@ -1,0 +1,22 @@
+{
+  "type": "library",
+  "name": "hooloovoo/database",
+  "description": "Database wrapper with support of persistent connection and replication Edit Add topics",
+  "keywords": ["database", "wrapper", "persistent", "replication"],
+  "homepage": "https://github.com/vnejedly/database",
+  "license": "MIT",
+  "authors": [{
+    "name": "Vladislav Nejedlý",
+    "email": "vladislav.nejedly@gmail.com",
+    "homepage": "https://www.linkedin.com/in/vladislav-nejedl%C3%BD-7140117b"
+  }],
+  "autoload": {
+    "psr-4": {
+      "Hooloovoo\\Database\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=7.0.0",
+    "hooloovoo/di": "@dev"
+  }
+}
