@@ -8,9 +8,8 @@ use Hooloovoo\Database\Exception\LogicException;
  */
 class TableLock extends AbstractHelper
 {
-    const FIELD_TABLE = 1;
-    const FIELD_ALIAS = 2;
-    const FIELD_WRITE = 3;
+    const FIELD_ALIAS = 1;
+    const FIELD_WRITE = 2;
 
     /** @var array[] */
     protected $_tables = [];
@@ -23,13 +22,22 @@ class TableLock extends AbstractHelper
      */
     public function addTable(string $table, bool $write, string $alias = null) : self
     {
-        $this->_tables[] = [
-            self::FIELD_TABLE => $table,
+        $this->_tables[$table] = [
             self::FIELD_ALIAS => $alias,
             self::FIELD_WRITE => $write
         ];
 
         return $this;
+    }
+
+    /**
+     * @param TableLock $lock
+     */
+    public function mergeLock(self $lock)
+    {
+        foreach ($lock->getTables() as $table => $lockInfo) {
+            $this->addTable($table, $lockInfo[self::FIELD_WRITE], $lockInfo[self::FIELD_ALIAS]);
+        }
     }
 
     /**
@@ -51,6 +59,14 @@ class TableLock extends AbstractHelper
     }
 
     /**
+     * @return array
+     */
+    protected function getTables() : array
+    {
+        return $this->_tables;
+    }
+
+    /**
      * @return string
      */
     protected function _getLockQueryString()
@@ -60,20 +76,20 @@ class TableLock extends AbstractHelper
         }
 
         $subStrings = [];
-        foreach ($this->_tables as $table) {
-            if (!is_null($table[self::FIELD_ALIAS])) {
-                $aliasPart = "AS {$table[self::FIELD_ALIAS]}";
+        foreach ($this->_tables as $table => $lock) {
+            if (!is_null($lock[self::FIELD_ALIAS])) {
+                $aliasPart = "AS {$lock[self::FIELD_ALIAS]}";
             } else {
                 $aliasPart = "";
             }
 
-            if ($table[self::FIELD_WRITE]) {
+            if ($lock[self::FIELD_WRITE]) {
                 $writePart = 'WRITE';
             } else {
                 $writePart = 'READ';
             }
 
-            $subStrings[] = "{$table[self::FIELD_TABLE]} $aliasPart $writePart";
+            $subStrings[] = "$table $aliasPart $writePart";
         }
 
         $subStringsImploded = implode(', ', $subStrings);
