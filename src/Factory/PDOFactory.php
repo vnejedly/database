@@ -59,6 +59,8 @@ class PDOFactory extends AbstractFactory
             $pdo->setAttribute($name, $value);
         }
 
+        $pdo->exec('SET NAMES utf8');
+
         return $pdo;
     }
 
